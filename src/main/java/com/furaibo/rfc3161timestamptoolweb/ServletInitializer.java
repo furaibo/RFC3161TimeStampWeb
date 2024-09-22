@@ -1,4 +1,4 @@
-package com.furaibo.rfc3161timestampapi;
+package com.furaibo.rfc3161timestamptoolweb;
 
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
@@ -7,7 +7,7 @@ public class ServletInitializer extends SpringBootServletInitializer {
 
 	@Override
 	protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
-		return application.sources(Rfc3161TimeStampApiApplication.class);
+		return application.sources(Application.class);
 	}
 
 }

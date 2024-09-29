@@ -1,0 +1,66 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+</head>
+
+<body>
+<div class="container">
+    <!-- nav bar -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand" href="#">RFC-3161 TS-Web</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="/uploader">Uploader</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/document">Document</a>
+                </li>
+                <li class="nav-item active">
+                    <a class="nav-link" href="#">History</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <div>
+        <!-- page header -->
+        <h1 class="pb-2 mt-4 mb-2 border-bottom">操作一覧</h1>
+
+        <!-- table -->
+        <table class="table">
+            <thead>
+                <tr>
+                    <th scope="col" class="col-md-1">ID</th>
+                    <th scope="col" class="col-md-3">タイトル</th>
+                    <th scope="col" class="col-md-6">操作説明</th>
+                    <th scope="col" class="col-md-2">操作日時</th>
+                </tr>
+            </thead>
+            <tbody>
+                <th:block th:each="hist : ${histories}">
+                <tr>
+                    <td th:text="${hist.id}"></td>
+                    <td th:text="${hist.actionTitle}"></td>
+                    <td th:text="${hist.actionDesc}"></td>
+                    <td th:text="${hist.createdAt}"></td>
+                    <td></td>
+                </tr>
+                </th:block>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- javascript-->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+
+</body>
+</html>

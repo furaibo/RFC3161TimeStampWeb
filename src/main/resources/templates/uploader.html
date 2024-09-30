@@ -60,12 +60,12 @@
                 <form class="col s6" method="POST" action="/api/add/timestamp/pdf" enctype="multipart/form-data">
                     <!-- textbox group -->
                     <div class="input-group mb-3">
-                        <span class="input-group-text" id="uploader-input1">タイトル</span>
+                        <span class="input-group-text" id="single-pdf-uploader-input1">タイトル</span>
                         <input type="text" class="form-control" name="title"
                                placeholder="Title" aria-label="Title" aria-describedby="basic-addon1">
                     </div>
                     <div class="input-group mb-3">
-                        <span class="input-group-text" id="uploader-input2">内容説明</span>
+                        <span class="input-group-text" id="single-pdf-uploader-input2">内容説明</span>
                         <input type="text" class="form-control" name="description"
                                placeholder="Description" aria-label="Title" aria-describedby="basic-addon1">
                     </div>
@@ -91,6 +91,25 @@
 
             <div class="tab-pane fade show" id="other-tab" role="tabpanel" aria-labelledby="other-tab-pane" tabindex="2">
                 <h3 class="pb-2 mt-4 mb-2">その他ファイルアップロード</h3>
+                <form class="col s6" method="POST" action="/api/add/timestamp/nonpdf" enctype="multipart/form-data">
+                    <!-- textbox group -->
+                    <div class="input-group mb-3">
+                        <span class="input-group-text" id="other-file-uploader-input1">タイトル</span>
+                        <input type="text" class="form-control" name="title"
+                               placeholder="Title" aria-label="Title" aria-describedby="basic-addon1">
+                    </div>
+                    <div class="input-group mb-3">
+                        <span class="input-group-text" id="other-file-uploader-input2">内容説明</span>
+                        <input type="text" class="form-control" name="description"
+                               placeholder="Description" aria-label="Title" aria-describedby="basic-addon1">
+                    </div>
+
+                    <!-- file picker -->
+                    <input type="file" name="uploadFiles" multiple />
+
+                    <!-- submit button -->
+                    <input type="submit" />
+                </form>
             </div>
         </div>
     </div>

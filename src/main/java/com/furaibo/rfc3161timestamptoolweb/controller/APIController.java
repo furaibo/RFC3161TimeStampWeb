@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -116,16 +117,43 @@ public class APIController {
         return "It works!";
     }
 
-    /*
     @PostMapping("/add/timestamp/nonpdf")
-    public String addTimeStampToNonPdf(){
-        // TODO
+    public String addTimeStampToNonPdf(
+        @RequestParam("uploadFiles") List<MultipartFile> files,
+        @RequestParam(name="title", required=false) String title,
+        @RequestParam(name="description", required=false) String description) {
+
+        try {
+            // アップロードファイルパス格納用のリスト
+            List<Path> uploadFilePathList = new ArrayList<>();
+
+            // ファイルのアップロード処理
+            for (MultipartFile file : files) {
+                Path uploadFilePath = fls.saveUploadFile(file);
+                uploadFilePathList.add(uploadFilePath);
+            }
+
+            // 埋め込み元PDFファイルの作成
+            Path basePdfFilePath = pdfs.makeBasePdfFile(title, description);
+
+            // ファイルの埋め込み処理
+            Path attachedFilePath = pdfs.attachFiles(basePdfFilePath, uploadFilePathList);
+
+            // タイムスタンプの付加
+            tss.addTimeStampToSingleFile(attachedFilePath);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "failed!";
+        }
+
+        return "It works!";
     }
 
+    /*
     @GetMapping("/histories/")
     public String verifyTimeStamp() {
         // TODO
     }
-
      */
 }

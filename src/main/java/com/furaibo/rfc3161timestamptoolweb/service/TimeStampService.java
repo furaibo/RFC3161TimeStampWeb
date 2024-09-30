@@ -69,7 +69,6 @@ public class TimeStampService {
         this.outputLogFolderPath = Paths.get(this.outputLogFolderPathStr);
     }
 
-
     /**
      * タイムスタンプ情報のテスト、レスポンス情報の表示
      *

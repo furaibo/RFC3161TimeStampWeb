@@ -13,7 +13,10 @@ import org.apache.pdfbox.pdmodel.font.PDFont;
 import org.apache.pdfbox.pdmodel.font.PDType0Font;
 import org.apache.pdfbox.pdmodel.font.PDType1Font;
 import org.apache.pdfbox.pdmodel.font.Standard14Fonts;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayInputStream;
@@ -36,6 +39,10 @@ public class PDFService {
     private Path outputFileRootPath;
     private Path outputFileFolderPath;
     private Path tmpFileRootPath;
+    private Resource fontFileResource;
+
+    @Autowired
+    ResourceLoader resourceLoader;
 
     @Value("${app.output.folder.file}")
     private String outputFileRootPathStr;
@@ -43,7 +50,7 @@ public class PDFService {
     @Value("${app.tmp.folder.file}")
     private String tmpFileRootPathStr;
 
-    @Value("${app.jp.font.file}")
+    @Value("${app.resource.font.file}")
     private String jpFontPathStr;
 
     @PostConstruct
@@ -52,6 +59,7 @@ public class PDFService {
             this.outputFileRootPath = Paths.get(outputFileRootPathStr);
             this.tmpFileRootPath = Paths.get(tmpFileRootPathStr);
             this.outputFileFolderPath = this.outputFileRootPath.resolve(dtFormat.format(LocalDateTime.now()));
+            this.fontFileResource = this.resourceLoader.getResource("classpath:" + jpFontPathStr);
         } catch (Exception e) {
             System.out.println(e.getMessage());
             System.exit(1);
@@ -192,7 +200,7 @@ public class PDFService {
         document.addPage(page);
 
         // フォント及びmediabox関連の変数初期化
-        PDFont pdfFont = PDType0Font.load(document, new File(jpFontPathStr));
+        PDFont pdfFont = PDType0Font.load(document, this.fontFileResource.getFile());
         float fontSize = 18;
         float leading = 1.5f * fontSize;
         float initMargin = 72;

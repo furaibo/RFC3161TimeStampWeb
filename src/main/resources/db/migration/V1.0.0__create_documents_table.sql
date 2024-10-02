@@ -6,6 +6,7 @@ CREATE TABLE documents (
     note                VARCHAR(400),
     upload_file_path    VARCHAR(300),
     timestamp_file_path VARCHAR(300),
+    download_key        VARCHAR(100),
     verified_at         DATETIME,
     created_at          DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at          DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP

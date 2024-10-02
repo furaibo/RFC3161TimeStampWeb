@@ -11,7 +11,13 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.PathResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -19,7 +25,9 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -189,6 +197,30 @@ public class APIController {
         response.sendRedirect("/document");
     }
 
+    @GetMapping("/document/download")
+    public ResponseEntity<Resource> downloadDocumentFile(
+            @RequestParam("key") String downloadKey) throws IOException {
+
+        System.out.println("!!!");
+        System.out.println(downloadKey);
+
+        Document doc = documentRepository.getByDownloadKey(downloadKey);
+        if (doc == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        Path filePath = Paths.get(doc.getUploadFilePath());
+        Resource resource = new PathResource(filePath);
+        String downloadFileName = doc.getTitle() + "." +
+                FilenameUtils.getExtension(resource.getFilename());
+
+        return ResponseEntity.ok()
+                .contentType(getContentType(filePath))
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        "attachment; filename=\"" + downloadFileName + "\"")
+                .body(resource);
+    }
+
     /*
     @GetMapping("/verify/timestamp/")
     public String verifyTimeStamp() {
@@ -197,4 +229,12 @@ public class APIController {
         //
     }
      */
+
+    private MediaType getContentType(Path path) throws IOException {
+        try {
+            return MediaType.parseMediaType(Files.probeContentType(path));
+        } catch (IOException e) {
+            return MediaType.APPLICATION_OCTET_STREAM;
+        }
+    }
 }

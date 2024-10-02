@@ -9,6 +9,7 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 
 import java.util.Date;
+import java.util.UUID;
 
 @Data
 @Entity
@@ -41,6 +42,9 @@ public class Document {
     @Column(name = "timestamp_file_path")
     private String timestampFilePath;
 
+    @Column(name = "download_key")
+    private String downloadKey;
+
     @Column(name = "verified_at")
     private Date verifiedAt;
 
@@ -57,6 +61,7 @@ public class Document {
     // コンストラクタ
     public Document() {
         this.isActive = true;
+        this.downloadKey = UUID.randomUUID().toString();
     }
 
 }

@@ -12,6 +12,9 @@ public interface DocumentRepository extends JpaRepository<Document, Integer> {
     @Query(value = "SELECT * FROM documents WHERE id = :id", nativeQuery = true)
     Document getById(int id);
 
+    @Query(value = "SELECT * FROM documents WHERE download_key = :key", nativeQuery = true)
+    Document getByDownloadKey(String key);
+
     @Query(value = "SELECT * FROM documents " +
             " ORDER BY created_at DESC" +
             " LIMIT :limit", nativeQuery = true)

@@ -25,7 +25,7 @@ public class FileService {
     @Value("${app.output.folder.file}")
     private String outputFileRootPathStr;
 
-    DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyyMMdd");
+    DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyyMMdd_HHmm");
 
     /**
      * Multipart形式のファイルのアップロード処理
@@ -33,13 +33,31 @@ public class FileService {
      * @param file
      * @return
      */
-    public Path saveUploadFile(MultipartFile file) throws IOException {
-        String ext = FilenameUtils.getExtension(file.getOriginalFilename());
+    public Path saveUploadFile(
+            MultipartFile file,
+            String fileNamePreFix,
+            boolean useRandomFileName) throws IOException {
 
-        // フォルダの作成
+        // 時刻とフォルダ名の取得
+        LocalDateTime ldt = LocalDateTime.now();
+        String folderName = ldt.format(dtf);
+
+        // フォルダパスの取得
         Path uploadFileRootPath = Paths.get(uploadFileRootPathStr);
-        Path fileFolderPath = this.getFileFolderPath(uploadFileRootPath);
-        Path filePath = this.getSaveFilePath(fileFolderPath, ext);
+        Path fileFolderPath = uploadFileRootPath.resolve(folderName);
+
+        // フォルダ作成
+        Files.createDirectories(fileFolderPath);
+
+        // ファイルパスの取得
+        Path filePath;
+        if (useRandomFileName) {
+            // 拡張子の取得およびランダムなファイル名の設定
+            String ext = FilenameUtils.getExtension(file.getOriginalFilename());
+            filePath = this.getRandomSaveFilePath(fileFolderPath, fileNamePreFix, ext);
+        } else {
+            filePath = fileFolderPath.resolve(fileNamePreFix + file.getOriginalFilename());
+        }
 
         // ファイルの保存処理
         try (OutputStream os = Files.newOutputStream(filePath, StandardOpenOption.CREATE)) {
@@ -53,38 +71,11 @@ public class FileService {
         return filePath;
     }
 
-    public Path copyFileToOutputFolder(Path inputFilePath) throws IOException {
-        String ext = FilenameUtils.getExtension(inputFilePath.toString());
-
-        // フォルダの作成
-        Path outputFileRootPath = Paths.get(outputFileRootPathStr);
-        Path outputFileFolderPath = this.getFileFolderPath(outputFileRootPath);
-        Path outputFilePath = this.getSaveFilePath(outputFileFolderPath, ext);
-
-        // ファイルコピーの処理
-        Files.copy(inputFilePath, outputFilePath);
-
-        return outputFilePath;
-    }
-
-    private Path getSaveFilePath(Path folderPath, String ext) throws IOException {
+    private Path getRandomSaveFilePath(
+            Path folderPath, String fileNamePrefix, String ext) throws IOException {
         // UUIDによるファイル名の決定
         String filename = UUID.randomUUID().toString();
-        return folderPath.resolve(filename + "." + ext);
-    }
-
-    private Path getFileFolderPath(Path rootFolderPath) throws IOException {
-        // 日付によるサブフォルダ名の決定
-        LocalDateTime ldt = LocalDateTime.now();
-        String folderName = ldt.format(dtf);
-
-        // フォルダの作成
-        Path fileFolderPath = rootFolderPath.resolve(folderName);
-        if (!Files.exists(fileFolderPath)) {
-            Files.createDirectories(fileFolderPath);
-        }
-
-        return fileFolderPath;
+        return folderPath.resolve(fileNamePrefix + filename + "." + ext);
     }
 
 }

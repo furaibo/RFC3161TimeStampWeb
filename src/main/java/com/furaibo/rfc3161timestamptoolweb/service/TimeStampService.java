@@ -107,8 +107,9 @@ public class TimeStampService {
      * @throws IOException
      * @throws TSPException
      * @throws InterruptedException
+     * return Path
      */
-    public void addTimeStampToSingleFile(Path inputFilePath)
+    public Path addTimeStampToSingleFile(Path inputFilePath)
             throws IOException, TSPException, InterruptedException {
 
         // ディレクトリの作成
@@ -126,6 +127,8 @@ public class TimeStampService {
 
         // タイムスタンプの取得と埋め込み
         this.embedTimeStampTokenToPDF(inputFilePath, outputFilePath);
+
+        return outputFilePath;
     }
 
     /**

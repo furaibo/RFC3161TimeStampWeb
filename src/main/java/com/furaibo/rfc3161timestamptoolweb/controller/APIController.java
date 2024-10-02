@@ -9,17 +9,23 @@ import com.furaibo.rfc3161timestamptoolweb.service.PDFService;
 import com.furaibo.rfc3161timestamptoolweb.service.TimeStampService;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 
+@Controller
 @RestController
 @RequestMapping("/api/")
 public class APIController {
@@ -57,22 +63,26 @@ public class APIController {
     }
 
     @GetMapping("/documents/list")
+    @ResponseBody
     public String getDocumentsList(){
         List<Document> docs = documentRepository.getLatestWithLimit(10);
         return gson.toJson(docs);
     }
 
     @GetMapping("/histories/list")
+    @ResponseBody
     public String getHistoriesList() {
         List<ActionHistory> docs = actionHistoryRepository.getLatestWithLimit(10);
         return gson.toJson(docs);
     }
 
     @PostMapping("/add/timestamp/pdf")
-    public String addTimeStampToPdf(
+    public void addTimeStampToPdf(
             @RequestParam("uploadFiles") List<MultipartFile> files,
             @RequestParam(name="title", required=false) String title,
-            @RequestParam(name="description", required=false) String description) {
+            @RequestParam(name="description", required=false) String description,
+            HttpServletResponse response,
+            RedirectAttributes redirectAttributes) throws IOException {
 
         try {
             for (MultipartFile file : files) {
@@ -80,7 +90,7 @@ public class APIController {
                 String fileName = file.getOriginalFilename();
 
                 // ファイルのアップロード処理
-                Path uploadFilePath = fls.saveUploadFile(file);
+                Path uploadFilePath = fls.saveUploadFile(file, "", true);
 
                 // タイムスタンプの付加
                 tss.addTimeStampToSingleFile(uploadFilePath);
@@ -109,27 +119,35 @@ public class APIController {
                 actionHistoryRepository.save(hist);
             }
 
+            // リダイレクト先への属性値の設定
+            redirectAttributes.addFlashAttribute("result", "success");
+
         } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("result", "failed");
             e.printStackTrace();
-            return "failed!";
         }
 
-        return "It works!";
+        // リダイレクト
+        response.sendRedirect("/document");
     }
 
     @PostMapping("/add/timestamp/nonpdf")
-    public String addTimeStampToNonPdf(
+    public void addTimeStampToNonPdf(
         @RequestParam("uploadFiles") List<MultipartFile> files,
         @RequestParam(name="title", required=false) String title,
-        @RequestParam(name="description", required=false) String description) {
+        @RequestParam(name="description", required=false) String description,
+        HttpServletResponse response,
+        RedirectAttributes redirectAttributes) throws IOException {
 
         try {
             // アップロードファイルパス格納用のリスト
             List<Path> uploadFilePathList = new ArrayList<>();
 
             // ファイルのアップロード処理
-            for (MultipartFile file : files) {
-                Path uploadFilePath = fls.saveUploadFile(file);
+            for (int i = 0; i < files.size(); i++) {
+                MultipartFile file = files.get(i);
+                String fileNamePrefix = String.format("%02d", i);
+                Path uploadFilePath = fls.saveUploadFile(file, fileNamePrefix, false);
                 uploadFilePathList.add(uploadFilePath);
             }
 
@@ -140,20 +158,43 @@ public class APIController {
             Path attachedFilePath = pdfs.attachFiles(basePdfFilePath, uploadFilePathList);
 
             // タイムスタンプの付加
-            tss.addTimeStampToSingleFile(attachedFilePath);
+            Path uploadFilePath = tss.addTimeStampToSingleFile(attachedFilePath);
+
+            // ドキュメント管理レコードの追加
+            Document doc = new Document();
+            doc.setUploadFilePath(uploadFilePath.toString());
+            doc.setTimestampFilePath(uploadFilePath.toString());
+            doc.setVerifiedAt(new Date());
+
+            // タイトル及び説明文の追加、レコードの記録
+            doc.setTitle(title);
+            doc.setDescription(description);
+            documentRepository.save(doc);
+
+            // 操作履歴の追加
+            ActionHistory hist = new ActionHistory();
+            hist.setActionTitle("Add non-pdf files");
+            hist.setActionDesc("upload non pdf-files and add timestamp");
+            actionHistoryRepository.save(hist);
+
+            // リダイレクト先への属性値の設定
+            redirectAttributes.addFlashAttribute("result", "success");
 
         } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("result", "failed");
             e.printStackTrace();
-            return "failed!";
         }
 
-        return "It works!";
+        // リダイレクト
+        response.sendRedirect("/document");
     }
 
     /*
-    @GetMapping("/histories/")
+    @GetMapping("/verify/timestamp/")
     public String verifyTimeStamp() {
+        //
         // TODO
+        //
     }
      */
 }

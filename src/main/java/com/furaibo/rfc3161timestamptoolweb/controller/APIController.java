@@ -19,7 +19,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
@@ -101,12 +100,12 @@ public class APIController {
                 Path uploadFilePath = fls.saveUploadFile(file, "", true);
 
                 // タイムスタンプの付加
-                tss.addTimeStampToSingleFile(uploadFilePath);
+                Path timeStampFilePath = tss.addTimeStampToSingleFile(uploadFilePath);
 
                 // ドキュメント管理レコードの追加
                 Document doc = new Document();
                 doc.setUploadFilePath(uploadFilePath.toString());
-                doc.setTimestampFilePath(uploadFilePath.toString());
+                doc.setTimestampFilePath(timeStampFilePath.toString());
                 doc.setVerifiedAt(new Date());
 
                 // タイトル及び説明文の追加
@@ -166,12 +165,12 @@ public class APIController {
             Path attachedFilePath = pdfs.attachFiles(basePdfFilePath, uploadFilePathList);
 
             // タイムスタンプの付加
-            Path uploadFilePath = tss.addTimeStampToSingleFile(attachedFilePath);
+            Path timeStampFilePath = tss.addTimeStampToSingleFile(attachedFilePath);
 
             // ドキュメント管理レコードの追加
             Document doc = new Document();
-            doc.setUploadFilePath(uploadFilePath.toString());
-            doc.setTimestampFilePath(uploadFilePath.toString());
+            doc.setUploadFilePath(attachedFilePath.toString());
+            doc.setTimestampFilePath(timeStampFilePath.toString());
             doc.setVerifiedAt(new Date());
 
             // タイトル及び説明文の追加、レコードの記録
@@ -201,19 +200,17 @@ public class APIController {
     public ResponseEntity<Resource> downloadDocumentFile(
             @RequestParam("key") String downloadKey) throws IOException {
 
-        System.out.println("!!!");
-        System.out.println(downloadKey);
-
         Document doc = documentRepository.getByDownloadKey(downloadKey);
         if (doc == null) {
             return ResponseEntity.notFound().build();
         }
 
-        Path filePath = Paths.get(doc.getUploadFilePath());
+        // タイムスタンプ付与済みファイルおよびファイル名の準備
+        Path filePath = Paths.get(doc.getTimestampFilePath());
         Resource resource = new PathResource(filePath);
-        String downloadFileName = doc.getTitle() + "." +
-                FilenameUtils.getExtension(resource.getFilename());
+        String downloadFileName = doc.getTitle() + "." + FilenameUtils.getExtension(resource.getFilename());
 
+        // ファイルダウンロード用のレスポンス返却
         return ResponseEntity.ok()
                 .contentType(getContentType(filePath))
                 .header(HttpHeaders.CONTENT_DISPOSITION,

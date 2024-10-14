@@ -34,6 +34,21 @@
         <!-- page header -->
         <h1 class="pb-2 mt-4 mb-2 border-bottom">操作履歴一覧</h1>
 
+        <!-- pagination bar -->
+        <div class="my-4">
+            <span>ページ:&nbsp;</span>
+            <a th:if="${histories.hasPrevious()}" th:href="@{/history(page=${histories.number - 1})}">前へ</a>
+
+            <th:block th:each="i:${#numbers.sequence(0, histories.totalPages-1)}">
+                <span th:if="${i}==${histories.number}" th:text="${i+1}"> </span>
+                <a th:if="${i}!=${histories.number}" th:href="@{/history(page=${i})}">
+                    <span th:text="${i+1}"></span>
+                </a>
+            </th:block>
+
+            <a th:if="${histories.hasNext()}" th:href="@{/history(page=${histories.number + 1})}">次へ</a>
+        </div>
+
         <!-- table -->
         <table class="table">
             <thead>
@@ -45,7 +60,7 @@
                 </tr>
             </thead>
             <tbody>
-                <th:block th:each="hist : ${histories}">
+                <th:block th:each="hist : ${histories.content}">
                 <tr class="align-middle">
                     <td th:text="${hist.id}"></td>
                     <td th:text="${hist.actionTitle}"></td>

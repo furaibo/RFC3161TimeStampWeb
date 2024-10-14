@@ -6,6 +6,9 @@ import com.furaibo.rfc3161timestamptoolweb.repository.ActionHistoryRepository;
 import com.furaibo.rfc3161timestamptoolweb.repository.DocumentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,7 +18,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import java.text.ParseException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
 
 
 @Controller
@@ -27,8 +29,8 @@ public class PageController {
     @Autowired
     private ActionHistoryRepository actionHistoryRepository;
 
-    @Value("${app.default.search.limit}")
-    private int defaultSearchLimit;
+    @Value("${app.default.page.size}")
+    private int defaultPageSize;
 
     DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
@@ -44,6 +46,7 @@ public class PageController {
             @ModelAttribute("startDate") String startDate,
             @ModelAttribute("endDate") String endDate,
             @ModelAttribute("mode") String mode,
+            @ModelAttribute("page") String page,
             Model model) throws ParseException {
 
         // 日付関連の処理
@@ -60,23 +63,35 @@ public class PageController {
             dtTo = LocalDate.parse(endDate, dtf);
         }
 
+        // ページ番号の処理
+        int pageIndex;
+        if (page.isBlank()) {
+            pageIndex = 0;
+        } else {
+            pageIndex = Integer.parseInt(page);
+            if (pageIndex < 0) {
+                pageIndex = 0;
+            }
+        }
+        Pageable pageable = PageRequest.of(pageIndex, defaultPageSize);
+
         // ドキュメント情報をセット
-        List<Document> documents;
+        Page<Document> documents;
         if (keyword.isBlank()) {
             if (startDate.isBlank() && endDate.isBlank()) {
                 // 新しい順に検索
-                documents = documentRepository.findLatestWithLimit(defaultSearchLimit);
+                documents = documentRepository.findAll(pageable);
             } else {
                 // 日時のみで検索
-                documents = documentRepository.findByDateRange(dtFrom, dtTo);
+                documents = documentRepository.findByDateRange(pageable, dtFrom, dtTo);
             }
         } else {
             if (startDate.isBlank() && endDate.isBlank()) {
                 // キーワードのみで検索
-                documents = documentRepository.findByKeyword(keyword);
+                documents = documentRepository.findByKeyword(pageable, keyword);
             } else {
                 // キーワード及び日時で検索
-                documents = documentRepository.findByKeywordAndDateRange(keyword, dtFrom, dtTo);
+                documents = documentRepository.findByKeywordAndDateRange(pageable, keyword, dtFrom, dtTo);
             }
         }
         model.addAttribute("documents", documents);
@@ -110,9 +125,24 @@ public class PageController {
     }
 
     @GetMapping("/history")
-    public String showHistories(Model model){
+    public String showHistories(
+            @ModelAttribute("page") String page,
+            Model model){
+
+        // ページ番号の処理
+        int pageIndex;
+        if (page.isBlank()) {
+            pageIndex = 0;
+        } else {
+            pageIndex = Integer.parseInt(page);
+            if (pageIndex < 0) {
+                pageIndex = 0;
+            }
+        }
+        Pageable pageable = PageRequest.of(pageIndex, defaultPageSize);
+
         // 操作履歴情報をセット
-        List<ActionHistory> histories = actionHistoryRepository.findLatestWithLimit(defaultSearchLimit);
+        Page<ActionHistory> histories = actionHistoryRepository.findAll(pageable);
         model.addAttribute("histories", histories);
         return "history";
     }

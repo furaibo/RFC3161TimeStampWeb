@@ -13,6 +13,6 @@ public interface ActionHistoryRepository extends JpaRepository<ActionHistory, In
     @Query(value = "SELECT * FROM action_histories" +
             " ORDER BY created_at DESC" +
             " LIMIT :limit", nativeQuery = true)
-    List<ActionHistory> getLatestWithLimit(int limit);
+    List<ActionHistory> findLatestWithLimit(int limit);
 
 }

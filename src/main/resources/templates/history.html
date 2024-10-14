@@ -10,7 +10,7 @@
 <div class="container">
     <!-- nav bar -->
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
-        <a class="navbar-brand" href="#">RFC-3161 TS-Web</a>
+        <a class="navbar-brand" href="/">RFC-3161 TS-Tool Web</a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
@@ -32,7 +32,7 @@
 
     <div>
         <!-- page header -->
-        <h1 class="pb-2 mt-4 mb-2 border-bottom">操作一覧</h1>
+        <h1 class="pb-2 mt-4 mb-2 border-bottom">操作履歴一覧</h1>
 
         <!-- table -->
         <table class="table">
@@ -46,12 +46,11 @@
             </thead>
             <tbody>
                 <th:block th:each="hist : ${histories}">
-                <tr>
+                <tr class="align-middle">
                     <td th:text="${hist.id}"></td>
                     <td th:text="${hist.actionTitle}"></td>
                     <td th:text="${hist.actionDesc}"></td>
-                    <td th:text="${hist.createdAt}"></td>
-                    <td></td>
+                    <td th:text="${#temporals.format(hist.createdAt, 'yyyy/MM/dd HH:mm:ss')}"></td>
                 </tr>
                 </th:block>
             </tbody>

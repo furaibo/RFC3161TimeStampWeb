@@ -10,7 +10,7 @@
 <div class="container">
     <!-- nav bar -->
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
-        <a class="navbar-brand" href="#">RFC-3161 TS-Web</a>
+        <a class="navbar-brand" href="/">RFC-3161 TS-Tool Web</a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
@@ -60,21 +60,29 @@
                 <form class="col s6" method="POST" action="/api/add/timestamp/pdf" enctype="multipart/form-data">
                     <!-- textbox group -->
                     <div class="input-group mb-3">
-                        <span class="input-group-text" id="single-pdf-uploader-input1">タイトル</span>
+                        <span class="input-group-text p-3" style="width: 100px" id="single-pdf-uploader-input1">タイトル</span>
                         <input type="text" class="form-control" name="title"
-                               placeholder="Title" aria-label="Title" aria-describedby="basic-addon1">
+                               placeholder="タイトルを入力してください" aria-label="Title" aria-describedby="basic-addon1">
                     </div>
                     <div class="input-group mb-3">
-                        <span class="input-group-text" id="single-pdf-uploader-input2">内容説明</span>
+                        <span class="input-group-text p-3" style="width: 100px" id="single-pdf-uploader-input2">内容説明</span>
                         <input type="text" class="form-control" name="description"
-                               placeholder="Description" aria-label="Title" aria-describedby="basic-addon1">
+                               placeholder="概要を入力してください" aria-label="Description" aria-describedby="basic-addon2">
+                    </div>
+                    <div class="input-group mb-3">
+                        <span class="input-group-text p-3" style="width: 100px" id="single-pdf-uploader-input3">備考</span>
+                        <textarea class="form-control" name="note" rows="5"></textarea>
                     </div>
 
                     <!-- file picker -->
-                    <input type="file" name="uploadFiles" accept="application/pdf" />
+                    <div class="input-group mb-3">
+                        <input type="file" class="p-3" name="uploadFiles" accept="application/pdf" />
+                    </div>
 
                     <!-- submit button -->
-                    <input type="submit" />
+                    <div class="input-group mb-3">
+                        <input type="submit" class="btn btn-primary" />
+                    </div>
                 </form>
             </div>
 
@@ -82,10 +90,14 @@
                 <h3 class="pb-2 mt-4 mb-2">複数PDFアップロード</h3>
                 <form class="col s6" method="POST" action="/api/add/timestamp/pdf" enctype="multipart/form-data">
                     <!-- file picker -->
-                    <input type="file" name="uploadFiles" accept="application/pdf" multiple />
+                    <div class="input-group mb-3">
+                        <input type="file" class="p-3" name="uploadFiles" accept="application/pdf" multiple />
+                    </div>
 
                     <!-- submit button -->
-                    <input type="submit" />
+                    <div class="input-group mb-3">
+                        <input type="submit" class="btn btn-primary" />
+                    </div>
                 </form>
             </div>
 
@@ -94,21 +106,30 @@
                 <form class="col s6" method="POST" action="/api/add/timestamp/nonpdf" enctype="multipart/form-data">
                     <!-- textbox group -->
                     <div class="input-group mb-3">
-                        <span class="input-group-text" id="other-file-uploader-input1">タイトル</span>
+                        <span class="input-group-text p-3" style="width: 100px" id="other-file-uploader-input1">タイトル</span>
                         <input type="text" class="form-control" name="title"
-                               placeholder="Title" aria-label="Title" aria-describedby="basic-addon1">
+                               placeholder="タイトルを入力してください" aria-label="Title" aria-describedby="basic-addon1">
                     </div>
                     <div class="input-group mb-3">
-                        <span class="input-group-text" id="other-file-uploader-input2">内容説明</span>
+                        <span class="input-group-text p-3" style="width: 100px" id="other-file-uploader-input2">内容説明</span>
                         <input type="text" class="form-control" name="description"
-                               placeholder="Description" aria-label="Title" aria-describedby="basic-addon1">
+                               placeholder="概要を入力してください" aria-label="Description" aria-describedby="basic-addon2">
+                    </div>
+                    <div class="input-group mb-3">
+                        <span class="input-group-text p-3" style="width: 100px" id="other-file-uploader-input3">備考</span>
+                        <textarea class="form-control" name="note" rows="5"></textarea>
                     </div>
 
+
                     <!-- file picker -->
-                    <input type="file" name="uploadFiles" multiple />
+                    <div class="input-group mb-3">
+                        <input type="file" class="p-3" name="uploadFiles" multiple />
+                    </div>
 
                     <!-- submit button -->
-                    <input type="submit" />
+                    <div class="input-group mb-3">
+                        <input type="submit" class="btn btn-primary" />
+                    </div>
                 </form>
             </div>
         </div>

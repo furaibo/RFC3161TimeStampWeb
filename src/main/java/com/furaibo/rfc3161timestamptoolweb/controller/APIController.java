@@ -27,8 +27,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 
@@ -72,14 +72,14 @@ public class APIController {
     @GetMapping("/documents/list")
     @ResponseBody
     public String getDocumentsList(){
-        List<Document> docs = documentRepository.getLatestWithLimit(10);
+        List<Document> docs = documentRepository.findLatestWithLimit(10);
         return gson.toJson(docs);
     }
 
     @GetMapping("/histories/list")
     @ResponseBody
     public String getHistoriesList() {
-        List<ActionHistory> docs = actionHistoryRepository.getLatestWithLimit(10);
+        List<ActionHistory> docs = actionHistoryRepository.findLatestWithLimit(10);
         return gson.toJson(docs);
     }
 
@@ -88,6 +88,7 @@ public class APIController {
             @RequestParam("uploadFiles") List<MultipartFile> files,
             @RequestParam(name="title", required=false) String title,
             @RequestParam(name="description", required=false) String description,
+            @RequestParam(name="note", required=false) String note,
             HttpServletResponse response,
             RedirectAttributes redirectAttributes) throws IOException {
 
@@ -106,12 +107,13 @@ public class APIController {
                 Document doc = new Document();
                 doc.setUploadFilePath(uploadFilePath.toString());
                 doc.setTimestampFilePath(timeStampFilePath.toString());
-                doc.setVerifiedAt(new Date());
+                doc.setVerifiedAt(LocalDateTime.now());
 
                 // タイトル及び説明文の追加
                 if (files.size() == 1) {
                     doc.setTitle(title);
                     doc.setDescription(description);
+                    doc.setNote(note);
                 } else {
                     doc.setTitle(fileName);
                 }
@@ -127,15 +129,14 @@ public class APIController {
             }
 
             // リダイレクト先への属性値の設定
-            redirectAttributes.addFlashAttribute("result", "success");
+            redirectAttributes.addFlashAttribute("addDocument", "1");
 
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("result", "failed");
             e.printStackTrace();
         }
 
         // リダイレクト
-        response.sendRedirect("/document");
+        response.sendRedirect("/document" + "?mode=addDocument");
     }
 
     @PostMapping("/add/timestamp/nonpdf")
@@ -143,8 +144,8 @@ public class APIController {
         @RequestParam("uploadFiles") List<MultipartFile> files,
         @RequestParam(name="title", required=false) String title,
         @RequestParam(name="description", required=false) String description,
-        HttpServletResponse response,
-        RedirectAttributes redirectAttributes) throws IOException {
+        @RequestParam(name="note", required=false) String note,
+        HttpServletResponse response) throws IOException {
 
         try {
             // アップロードファイルパス格納用のリスト
@@ -171,11 +172,12 @@ public class APIController {
             Document doc = new Document();
             doc.setUploadFilePath(attachedFilePath.toString());
             doc.setTimestampFilePath(timeStampFilePath.toString());
-            doc.setVerifiedAt(new Date());
+            doc.setVerifiedAt(LocalDateTime.now());
 
             // タイトル及び説明文の追加、レコードの記録
             doc.setTitle(title);
             doc.setDescription(description);
+            doc.setNote(note);
             documentRepository.save(doc);
 
             // 操作履歴の追加
@@ -184,22 +186,19 @@ public class APIController {
             hist.setActionDesc("upload non pdf-files and add timestamp");
             actionHistoryRepository.save(hist);
 
-            // リダイレクト先への属性値の設定
-            redirectAttributes.addFlashAttribute("result", "success");
-
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("result", "failed");
             e.printStackTrace();
         }
 
         // リダイレクト
-        response.sendRedirect("/document");
+        response.sendRedirect("/document" + "?mode=addDocument");
     }
 
     @GetMapping("/document/download")
     public ResponseEntity<Resource> downloadDocumentFile(
             @RequestParam("key") String downloadKey) throws IOException {
 
+        // ダウンロードキーによるドキュメント検索
         Document doc = documentRepository.getByDownloadKey(downloadKey);
         if (doc == null) {
             return ResponseEntity.notFound().build();
@@ -219,11 +218,40 @@ public class APIController {
     }
 
     /*
-    @GetMapping("/verify/timestamp/")
-    public String verifyTimeStamp() {
-        //
-        // TODO
-        //
+    @GetMapping("/document/verify")
+    public ResponseEntity<Resource> verifyDocumentFiles(
+            @RequestParam("documentIds") List<Integer> ids) throws IOException, TSPException, CMSException {
+
+        // IDのリストによるドキュメント検索
+        List<Document> documentList = documentRepository.findByIDs(ids);
+
+        // 入力ファイルパスのリストの準備
+        List<Path> inputFilePathList = new ArrayList<Path>();
+        for (Document doc : documentList) {
+            Path filePath = Paths.get(doc.getTimestampFilePath());
+            inputFilePathList.add(filePath);
+        }
+
+        // 検証結果CSVファイルの準備
+        Path outputCsvFilePath = tss.verifyTimeStampInMultipleFiles(inputFilePathList);
+
+        // 前回検証日時の更新処理
+        LocalDateTime dtNow = LocalDateTime.now();
+        for (Document doc : documentList) {
+            doc.setVerifiedAt(dtNow);
+            documentRepository.save(doc);
+        }
+
+        // タイムスタンプ付与済みファイルおよびファイル名の準備
+        Resource resource = new PathResource(outputCsvFilePath);
+        String downloadCsvFileName = FilenameUtils.getName(outputCsvFilePath.toString());
+
+        // ファイルダウンロード用のレスポンス返却
+        return ResponseEntity.ok()
+                .contentType(getContentType(outputCsvFilePath))
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        "attachment; filename=\"" + downloadCsvFileName + "\"")
+                .body(resource);
     }
      */
 

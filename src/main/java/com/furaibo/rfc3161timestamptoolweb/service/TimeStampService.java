@@ -176,7 +176,7 @@ public class TimeStampService {
      * @throws TSPException
      * @throws CMSException
      */
-    public void verifyTimeStampInMultipleFiles(List<Path> inputFilePathList)
+    public Path verifyTimeStampInMultipleFiles(List<Path> inputFilePathList)
             throws IOException, TSPException, CMSException {
 
         // ディレクトリの作成
@@ -227,6 +227,9 @@ public class TimeStampService {
         // CSVPrinterの終了時処理
         csvPrinter.flush();
         csvPrinter.close();
+
+        // CSVファイルパスの返却
+        return Paths.get(outputCsvFilePathStr);
     }
 
     /**

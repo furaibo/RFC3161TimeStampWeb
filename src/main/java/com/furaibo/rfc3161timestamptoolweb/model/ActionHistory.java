@@ -6,7 +6,7 @@ import lombok.Data;
 import org.hibernate.annotations.CreationTimestamp;
 import org.springframework.data.annotation.CreatedDate;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 @Data
 @Entity
@@ -30,6 +30,6 @@ public class ActionHistory {
     @CreatedDate
     @CreationTimestamp
     @Expose
-    private Date createdAt;
+    private LocalDateTime createdAt;
 
 }

@@ -33,39 +33,44 @@
 
     <div>
         <!-- page header -->
-        <h1 class="pb-2 mt-4 mb-2 border-bottom">保存済みドキュメント一覧</h1>
+        <h1 class="pb-2 mt-4 mb-2 border-bottom">ドキュメント詳細</h1>
 
-        <!-- alert -->
-        <div>
-            <div class="alert alert-success" th:if="${showAddDocument}">ドキュメントが追加されました</div>
-            <div class="alert alert-success" th:if="${showUpdateDocument}">ドキュメントの更新が完了しました</div>
-        </div>
-
-
-        <!-- table -->
+        <!-- document detail table -->
         <table class="table">
             <thead>
-                <tr>
-                    <th scope="col" class="col-md-1">ID</th>
-                    <th scope="col" class="col-md-3">タイトル</th>
-                    <th scope="col" class="col-md-4">内容説明</th>
-                    <th scope="col" class="col-md-2">作成日時</th>
-                    <th scope="col" class="col-md-2">操作</th>
+                <tr class="align-middle">
+                    <td>項目名</td>
                 </tr>
             </thead>
             <tbody>
-                <th:block th:each="doc : ${documents}">
-                <tr class="align-middle">
-                    <td th:text="${doc.id}"></td>
-                    <td th:text="${doc.title}"></td>
-                    <td th:text="${doc.description}"></td>
-                    <td th:text="${#temporals.format(doc.createdAt, 'yyyy/MM/dd HH:mm:ss')}"></td>
-                    <td>
-                        <a th:href="${doc.getDetailPageLink()}" class="btn btn-primary" role="button">詳細</a>
-                        <a th:href="${doc.getDownloadLink()}" class="btn btn-light" role="button">ファイルDL</a>
-                    </td>
+                <tr class="align-middle p-3">
+                    <td>ID</td>
+                    <td th:text="${document.id}"></td>
+                <tr>
+                <tr class="align-middle p-3">
+                    <td>タイトル</td>
+                    <td th:text="${document.title}"></td>
                 </tr>
-                </th:block>
+                <tr class="align-middle p-3">
+                    <td>概要説明</td>
+                    <td th:text="${document.description}"></td>
+                </tr>
+                <tr class="align-middle p-3">
+                    <td>補足</td>
+                    <td th:text="${document.note}"></td>
+                </tr>
+                <tr class="align-middle p-3">
+                    <td>作成日時</td>
+                    <td th:text="${#temporals.format(document.createdAt, 'yyyy/MM/dd HH:mm:ss')}"></td>
+                </tr>
+                <tr class="align-middle p-3">
+                    <td>前回検証日時</td>
+                    <td th:text="${#temporals.format(document.verifiedAt, 'yyyy/MM/dd HH:mm:ss')}"></td>
+                </tr>
+                <tr class="align-middle p-3">
+                    <td>ファイルDLリンク</td>
+                    <td><a th:href="${document.getDownloadKey()}" class="btn btn-primary" role="button">タイムスタンプ付与済みファイルのDL</a></td>
+                </tr>
             </tbody>
         </table>
     </div>

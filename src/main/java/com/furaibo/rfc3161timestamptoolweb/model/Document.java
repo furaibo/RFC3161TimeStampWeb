@@ -8,7 +8,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Data
@@ -46,17 +46,17 @@ public class Document {
     private String downloadKey;
 
     @Column(name = "verified_at")
-    private Date verifiedAt;
+    private LocalDateTime verifiedAt;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     @CreatedDate
     @CreationTimestamp
-    private Date createdAt;
+    private LocalDateTime createdAt;
 
     @Column(name = "updated_at", nullable = false)
     @LastModifiedDate
     @UpdateTimestamp
-    private Date updatedAt;
+    private LocalDateTime updatedAt;
 
     // コンストラクタ
     public Document() {
@@ -64,4 +64,12 @@ public class Document {
         this.downloadKey = UUID.randomUUID().toString();
     }
 
+    // ゲッター
+    public String getDetailPageLink() {
+        return "/document/" + this.id;
+    }
+
+    public String getDownloadLink() {
+        return "/api/document/download?key=" + this.downloadKey;
+    }
 }

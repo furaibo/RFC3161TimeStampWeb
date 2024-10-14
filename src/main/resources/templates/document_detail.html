@@ -22,7 +22,7 @@
                     <a class="nav-link" href="/uploader">Uploader</a>
                 </li>
                 <li class="nav-item active">
-                    <a class="nav-link" href="#">Document</a>
+                    <a class="nav-link" href="/document">Document</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="/history">History</a>
@@ -35,6 +35,11 @@
         <!-- page header -->
         <h1 class="pb-2 mt-4 mb-2 border-bottom">ドキュメント詳細</h1>
 
+        <!-- alert -->
+        <div>
+            <div class="alert alert-success" th:if="${showUpdateDocument}">ドキュメントの更新が完了しました</div>
+        </div>
+
         <!-- document detail table -->
         <table class="table">
             <thead>
@@ -43,33 +48,86 @@
                 </tr>
             </thead>
             <tbody>
-                <tr class="align-middle p-3">
+                <tr class="align-middle mb-3">
                     <td>ID</td>
                     <td th:text="${document.id}"></td>
+
                 <tr>
-                <tr class="align-middle p-3">
+                <tr class="align-middle mb-3">
                     <td>タイトル</td>
-                    <td th:text="${document.title}"></td>
+                    <td>
+                        <form class="row" method="POST" th:action="${document.getTitleUpdateApiLink()}">
+                            <div class="input-group">
+                                <div class="col-10">
+                                    <input type="text" class="form-control" name="title" th:value="${document.title}" />
+                                </div>
+                                <span class="input-group-addon"></span>
+                                <div class="col-1">
+                                    <input type="reset" class="form-control col-1 btn btn-secondary" value="リセット">
+                                </div>
+                                <span class="input-group-addon"></span>
+                                <div class="col-1">
+                                    <input type="submit" class="form-control col-1 btn btn-danger" value="更新">
+                                </div>
+                            </div>
+                        </form>
+                    </td>
                 </tr>
-                <tr class="align-middle p-3">
+                <tr class="align-middle mb-3">
                     <td>概要説明</td>
-                    <td th:text="${document.description}"></td>
+                    <td>
+                        <form class="row" method="POST" th:action="${document.getDescriptionUpdateApiLink()}">
+                            <div class="input-group">
+                                <div class="col-10">
+                                    <input type="text" class="form-control" name="description" th:value="${document.description}" />
+                                </div>
+                                <span class="input-group-addon"></span>
+                                <div class="col-1">
+                                    <input type="reset" class="form-control col-1 btn btn-secondary" value="リセット">
+                                </div>
+                                <span class="input-group-addon"></span>
+                                <div class="col-1">
+                                    <input type="submit" class="form-control col-1 btn btn-danger" value="更新">
+                                </div>
+                            </div>
+                        </form>
+                    </td>
                 </tr>
-                <tr class="align-middle p-3">
-                    <td>補足</td>
-                    <td th:text="${document.note}"></td>
+                <tr class="align-middle mb-3">
+                    <td>補足事項</td>
+                    <td>
+                        <form class="row" method="POST" th:action="${document.getNoteUpdateApiLink()}">
+                            <div class="input-group">
+                                <div class="col-10">
+                                    <input type="text" class="form-control" name="note" th:value="${document.note}" />
+                                </div>
+                                <span class="input-group-addon"></span>
+                                <div class="col-1">
+                                    <input type="reset" class="form-control col-1 btn btn-secondary" value="リセット">
+                                </div>
+                                <span class="input-group-addon"></span>
+                                <div class="col-1">
+                                    <input type="submit" class="form-control col-1 btn btn-danger" value="更新">
+                                </div>
+                            </div>
+                        </form>
+                    </td>
                 </tr>
-                <tr class="align-middle p-3">
+                <tr class="align-middle mb-3">
                     <td>作成日時</td>
                     <td th:text="${#temporals.format(document.createdAt, 'yyyy/MM/dd HH:mm:ss')}"></td>
                 </tr>
-                <tr class="align-middle p-3">
+                <tr class="align-middle mb-3">
                     <td>前回検証日時</td>
                     <td th:text="${#temporals.format(document.verifiedAt, 'yyyy/MM/dd HH:mm:ss')}"></td>
                 </tr>
-                <tr class="align-middle p-3">
+                <tr class="align-middle mb-3">
                     <td>ファイルDLリンク</td>
-                    <td><a th:href="${document.getDownloadKey()}" class="btn btn-primary" role="button">タイムスタンプ付与済みファイルのDL</a></td>
+                    <td>
+                        <a th:href="${document.getDownloadApiLink()}" class="btn btn-primary" role="button">
+                            タイムスタンプ付与済みファイルのDL
+                        </a>
+                    </td>
                 </tr>
             </tbody>
         </table>

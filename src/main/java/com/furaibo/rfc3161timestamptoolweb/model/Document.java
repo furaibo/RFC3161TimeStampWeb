@@ -69,7 +69,25 @@ public class Document {
         return "/document/" + this.id;
     }
 
-    public String getDownloadLink() {
+    public String getTitleUpdateApiLink() {
+        return "/api/document/" + this.id + "/update/title";
+    }
+
+    public String getDescriptionUpdateApiLink() {
+        return "/api/document/" + this.id + "/update/description";
+    }
+
+    public String getNoteUpdateApiLink() {
+        return "/api/document/" + this.id + "/update/note";
+    }
+
+    public String getDownloadApiLink() {
         return "/api/document/download?key=" + this.downloadKey;
     }
+
+    // セッター
+    public void renewUpdatedAt() {
+        this.updatedAt = LocalDateTime.now();
+    }
+
 }

@@ -41,6 +41,26 @@
             <div class="alert alert-success" th:if="${showUpdateDocument}">ドキュメントの更新が完了しました</div>
         </div>
 
+        <!-- search form -->
+        <form class="col s6" method="GET" action="/document">
+            <!-- input group -->
+            <div class="input-group mb-3">
+                <span class="input-group-text p-3" style="width: 150px" id="document-search-keyword">検索キーワード</span>
+                <input type="text" class="form-control" name="keyword" th:value="${keyword}"
+                       placeholder="検索キーワードを入力してください" aria-label="keyword">
+            </div>
+            <div class="input-group mb-3">
+                <span class="input-group-text p-3" style="width: 150px" id="document-search-startdate">日時範囲(from)</span>
+                <input type="date" name="startDate" class="form-control" th:value="${startDate}" />
+                <span class="input-group-text p-3" style="width: 150px" id="document-search-enddate">日時範囲(to)</span>
+                <input type="date" name="endDate" class="form-control" th:value="${endDate}" />
+            </div>
+
+            <!-- submit button -->
+            <div class="input-group mb-3">
+                <input type="submit" class="btn btn-primary" value="検索" />
+            </div>
+        </form>
 
         <!-- table -->
         <table class="table">

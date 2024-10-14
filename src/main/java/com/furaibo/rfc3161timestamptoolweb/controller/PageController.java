@@ -12,7 +12,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 
+import java.text.ParseException;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 
@@ -28,6 +30,8 @@ public class PageController {
     @Value("${app.default.search.limit}")
     private int defaultSearchLimit;
 
+    DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
     @GetMapping({"/", "/uploader"})
     public String showUploader(Model model){
         model.addAttribute("message", "This is sample message.");
@@ -37,19 +41,43 @@ public class PageController {
     @GetMapping("/document")
     public String showDocuments(
             @ModelAttribute("keyword") String keyword,
+            @ModelAttribute("startDate") String startDate,
+            @ModelAttribute("endDate") String endDate,
             @ModelAttribute("mode") String mode,
-            Model model) {
+            Model model) throws ParseException {
+
+        // 日付関連の処理
+        LocalDate dtFrom, dtTo;
+        LocalDate dtNow = LocalDate.now();
+        if (startDate.isBlank()) {
+            dtFrom = dtNow.minusYears(5);
+        } else {
+            dtFrom = LocalDate.parse(startDate, dtf);
+        }
+        if (endDate.isBlank()) {
+            dtTo = dtNow;
+        } else {
+            dtTo = LocalDate.parse(endDate, dtf);
+        }
 
         // ドキュメント情報をセット
         List<Document> documents;
         if (keyword.isBlank()) {
-            // 新しい順に検索
-            documents = documentRepository.findLatestWithLimit(defaultSearchLimit);
+            if (startDate.isBlank() && endDate.isBlank()) {
+                // 新しい順に検索
+                documents = documentRepository.findLatestWithLimit(defaultSearchLimit);
+            } else {
+                // 日時のみで検索
+                documents = documentRepository.findByDateRange(dtFrom, dtTo);
+            }
         } else {
-            // キーワード及び日時で検索
-            LocalDate dtNow = LocalDate.now();
-            LocalDate dtOneYearAgo = dtNow.minusYears(1);
-            documents = documentRepository.findByKeywordAndDateRange(keyword, dtOneYearAgo, dtNow);
+            if (startDate.isBlank() && endDate.isBlank()) {
+                // キーワードのみで検索
+                documents = documentRepository.findByKeyword(keyword);
+            } else {
+                // キーワード及び日時で検索
+                documents = documentRepository.findByKeywordAndDateRange(keyword, dtFrom, dtTo);
+            }
         }
         model.addAttribute("documents", documents);
 

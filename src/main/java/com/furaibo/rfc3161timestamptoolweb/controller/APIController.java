@@ -69,18 +69,52 @@ public class APIController {
         return "It works!";
     }
 
-    @GetMapping("/documents/list")
-    @ResponseBody
-    public String getDocumentsList(){
-        List<Document> docs = documentRepository.findLatestWithLimit(10);
-        return gson.toJson(docs);
+    @PostMapping("/document/{documentID}/update/title")
+    public void updateDocumentTitle(
+            @PathVariable("documentID") Integer documentID,
+            @RequestParam(name="title") String title,
+            HttpServletResponse response) throws IOException {
+
+        // 値の更新
+        Document doc = documentRepository.getReferenceById(documentID);
+        doc.setTitle(title);
+        doc.renewUpdatedAt();
+        documentRepository.save(doc);
+
+        // リダイレクト
+        response.sendRedirect("/document/" + documentID + "?mode=updateDocument");
     }
 
-    @GetMapping("/histories/list")
-    @ResponseBody
-    public String getHistoriesList() {
-        List<ActionHistory> docs = actionHistoryRepository.findLatestWithLimit(10);
-        return gson.toJson(docs);
+    @PostMapping("/document/{documentID}/update/description")
+    public void updateDocumentDescription(
+            @PathVariable("documentID") Integer documentID,
+            @RequestParam(name="description") String description,
+            HttpServletResponse response) throws IOException {
+
+        // 値の更新
+        Document doc = documentRepository.getReferenceById(documentID);
+        doc.setDescription(description);
+        doc.renewUpdatedAt();
+        documentRepository.save(doc);
+
+        // リダイレクト
+        response.sendRedirect("/document/" + documentID + "?mode=updateDocument");
+    }
+
+    @PostMapping("/document/{documentID}/update/note")
+    public void updateDocumentNote(
+            @PathVariable("documentID") Integer documentID,
+            @RequestParam(name="note") String note,
+            HttpServletResponse response) throws IOException {
+
+        // 値の更新
+        Document doc = documentRepository.getReferenceById(documentID);
+        doc.setDescription(note);
+        doc.renewUpdatedAt();
+        documentRepository.save(doc);
+
+        // リダイレクト
+        response.sendRedirect("/document/" + documentID + "?mode=updateDocument");
     }
 
     @PostMapping("/add/timestamp/pdf")

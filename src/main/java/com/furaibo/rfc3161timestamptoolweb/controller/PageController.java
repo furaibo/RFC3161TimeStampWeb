@@ -94,11 +94,17 @@ public class PageController {
     @GetMapping("/document/{documentID}")
     public String showDocuments(
             @PathVariable("documentID") Integer documentID,
+            @ModelAttribute("mode") String mode,
             Model model) {
 
         // ドキュメント情報をセット
-        Document document = documentRepository.getReferenceById(documentID);
-        model.addAttribute("document", document);
+        Document doc = documentRepository.getReferenceById(documentID);
+        model.addAttribute("document", doc);
+
+        // メッセージ表示フラグ情報の設定
+        if (mode.equals("updateDocument")) {
+            model.addAttribute("showUpdateDocument", true);
+        }
 
         return "document_detail";
     }

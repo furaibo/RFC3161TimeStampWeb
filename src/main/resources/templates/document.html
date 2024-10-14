@@ -58,7 +58,7 @@
 
             <!-- submit button -->
             <div class="input-group mb-3">
-                <input type="submit" class="btn btn-primary" value="検索" />
+                <input type="submit" class="btn btn-primary" value="ドキュメント検索" />
             </div>
         </form>
 
@@ -82,7 +82,7 @@
                     <td th:text="${#temporals.format(doc.createdAt, 'yyyy/MM/dd HH:mm:ss')}"></td>
                     <td>
                         <a th:href="${doc.getDetailPageLink()}" class="btn btn-primary" role="button">詳細</a>
-                        <a th:href="${doc.getDownloadLink()}" class="btn btn-light" role="button">ファイルDL</a>
+                        <a th:href="${doc.getDownloadApiLink()}" class="btn btn-light" role="button">ファイルDL</a>
                     </td>
                 </tr>
                 </th:block>

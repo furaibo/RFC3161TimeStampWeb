@@ -23,6 +23,16 @@ public interface DocumentRepository extends JpaRepository<Document, Integer> {
 
     @Query(value = "SELECT * FROM documents " +
             "WHERE (title LIKE '%' || :keyword || '%') OR (description LIKE '%' || :keyword || '%') " +
+            "ORDER BY created_at DESC", nativeQuery = true)
+    List<Document> findByKeyword(String keyword);
+
+    @Query(value = "SELECT * FROM documents " +
+            "WHERE (created_at BETWEEN :startDate AND :endDate) " +
+            "ORDER BY created_at DESC", nativeQuery = true)
+    List<Document> findByDateRange(LocalDate startDate, LocalDate endDate);
+
+    @Query(value = "SELECT * FROM documents " +
+            "WHERE (title LIKE '%' || :keyword || '%') OR (description LIKE '%' || :keyword || '%') " +
             "  AND (created_at BETWEEN :startDate AND :endDate) " +
             "ORDER BY created_at DESC", nativeQuery = true)
     List<Document> findByKeywordAndDateRange(String keyword, LocalDate startDate, LocalDate endDate);

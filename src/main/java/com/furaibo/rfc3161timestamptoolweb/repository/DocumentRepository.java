@@ -1,6 +1,8 @@
 package com.furaibo.rfc3161timestamptoolweb.repository;
 
 import com.furaibo.rfc3161timestamptoolweb.model.Document;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -17,27 +19,18 @@ public interface DocumentRepository extends JpaRepository<Document, Integer> {
     List<Document> findByIDs(List<Integer> ids);
 
     @Query(value = "SELECT * FROM documents " +
-            "ORDER BY created_at DESC " +
-            "LIMIT :limit", nativeQuery = true)
-    List<Document> findLatestWithLimit(int limit);
-
-    @Query(value = "SELECT * FROM documents " +
             "WHERE (title LIKE '%' || :keyword || '%') OR (description LIKE '%' || :keyword || '%') " +
-            "ORDER BY created_at DESC", nativeQuery = true)
-    List<Document> findByKeyword(String keyword);
+            "\n -- #pageable \n", nativeQuery = true)
+    Page<Document> findByKeyword(Pageable pageable, String keyword);
 
     @Query(value = "SELECT * FROM documents " +
             "WHERE (created_at BETWEEN :startDate AND :endDate) " +
-            "ORDER BY created_at DESC", nativeQuery = true)
-    List<Document> findByDateRange(LocalDate startDate, LocalDate endDate);
+            "\n -- #pageable \n", nativeQuery = true)
+    Page<Document> findByDateRange(Pageable pageable, LocalDate startDate, LocalDate endDate);
 
     @Query(value = "SELECT * FROM documents " +
             "WHERE (title LIKE '%' || :keyword || '%') OR (description LIKE '%' || :keyword || '%') " +
             "  AND (created_at BETWEEN :startDate AND :endDate) " +
-            "ORDER BY created_at DESC", nativeQuery = true)
-    List<Document> findByKeywordAndDateRange(String keyword, LocalDate startDate, LocalDate endDate);
-
-    @Query(value = "SELECT * FROM documents " +
-            "WHERE created_at BETWEEN ':fromDate' AND ':toDate'", nativeQuery = true)
-    List<Document> findByDateRange(String word, String fromDate, String toDate);
+            "\n -- #pageable \n", nativeQuery = true)
+    Page<Document> findByKeywordAndDateRange(Pageable pageable, String keyword, LocalDate startDate, LocalDate endDate);
 }

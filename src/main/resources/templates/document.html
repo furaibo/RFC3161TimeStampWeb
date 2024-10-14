@@ -62,6 +62,22 @@
             </div>
         </form>
 
+        <!-- pagination bar -->
+        <div class="my-4">
+            <span>ページ:&nbsp;</span>
+
+            <a th:if="${documents.hasPrevious()}" th:href="@{/document(page=${documents.number - 1})}">前へ</a>
+
+            <th:block th:each="i:${#numbers.sequence(0, documents.totalPages-1)}">
+            <span th:if="${i}==${documents.number}" th:text="${i+1}"> </span>
+            <a th:if="${i}!=${documents.number}" th:href="@{/document(page=${i})}">
+                <span th:text="${i+1}"></span>
+            </a>
+            </th:block>
+
+            <a th:if="${documents.hasNext()}" th:href="@{/document(page=${documents.number + 1})}">次へ</a>
+        </div>
+
         <!-- table -->
         <table class="table">
             <thead>
@@ -74,7 +90,7 @@
                 </tr>
             </thead>
             <tbody>
-                <th:block th:each="doc : ${documents}">
+                <th:block th:each="doc : ${documents.content}">
                 <tr class="align-middle">
                     <td th:text="${doc.id}"></td>
                     <td th:text="${doc.title}"></td>

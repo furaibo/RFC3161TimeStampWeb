@@ -81,6 +81,12 @@ public class APIController {
         doc.renewUpdatedAt();
         documentRepository.save(doc);
 
+        // 操作履歴の追加
+        ActionHistory hist = new ActionHistory();
+        hist.setActionTitle("ドキュメント情報(タイトル)の更新");
+        hist.setActionDesc("documentID: " + documentID);
+        actionHistoryRepository.save(hist);
+
         // リダイレクト
         response.sendRedirect("/document/" + documentID + "?mode=updateDocument");
     }
@@ -97,6 +103,12 @@ public class APIController {
         doc.renewUpdatedAt();
         documentRepository.save(doc);
 
+        // 操作履歴の追加
+        ActionHistory hist = new ActionHistory();
+        hist.setActionTitle("ドキュメント情報(内容説明)の更新");
+        hist.setActionDesc("documentID: " + documentID);
+        actionHistoryRepository.save(hist);
+
         // リダイレクト
         response.sendRedirect("/document/" + documentID + "?mode=updateDocument");
     }
@@ -112,6 +124,12 @@ public class APIController {
         doc.setDescription(note);
         doc.renewUpdatedAt();
         documentRepository.save(doc);
+
+        // 操作履歴の追加
+        ActionHistory hist = new ActionHistory();
+        hist.setActionTitle("ドキュメント情報(補足事項)の更新");
+        hist.setActionDesc("documentID: " + documentID);
+        actionHistoryRepository.save(hist);
 
         // リダイレクト
         response.sendRedirect("/document/" + documentID + "?mode=updateDocument");
@@ -157,8 +175,8 @@ public class APIController {
 
                 // 操作履歴の追加
                 ActionHistory hist = new ActionHistory();
-                hist.setActionTitle("Add new pdf file");
-                hist.setActionDesc("upload file and add timestamp - " + fileName);
+                hist.setActionTitle("新規PDFファイルの追加");
+                hist.setActionDesc("PDFファイルへのタイムスタンプ追加 - ファイル名: " + fileName);
                 actionHistoryRepository.save(hist);
             }
 
@@ -216,8 +234,8 @@ public class APIController {
 
             // 操作履歴の追加
             ActionHistory hist = new ActionHistory();
-            hist.setActionTitle("Add non-pdf files");
-            hist.setActionDesc("upload non pdf-files and add timestamp");
+            hist.setActionTitle("PDF形式以外のファイル追加");
+            hist.setActionDesc("非PDFファイルのPDF形式変換およびタイムスタンプ追加");
             actionHistoryRepository.save(hist);
 
         } catch (Exception e) {

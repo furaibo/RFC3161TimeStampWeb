@@ -68,11 +68,17 @@
 
             <a th:if="${documents.hasPrevious()}" th:href="@{/document(page=${documents.number - 1})}">前へ</a>
 
+            <th:block th:if="${documents.totalPages le 1}">
+            <span>1</span>
+            </th:block>
+
+            <th:block th:if="${documents.totalPages gt 1}">
             <th:block th:each="i:${#numbers.sequence(0, documents.totalPages-1)}">
             <span th:if="${i}==${documents.number}" th:text="${i+1}"> </span>
             <a th:if="${i}!=${documents.number}" th:href="@{/document(page=${i})}">
                 <span th:text="${i+1}"></span>
             </a>
+            </th:block>
             </th:block>
 
             <a th:if="${documents.hasNext()}" th:href="@{/document(page=${documents.number + 1})}">次へ</a>

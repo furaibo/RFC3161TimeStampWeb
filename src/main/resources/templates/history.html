@@ -39,11 +39,17 @@
             <span>ページ:&nbsp;</span>
             <a th:if="${histories.hasPrevious()}" th:href="@{/history(page=${histories.number - 1})}">前へ</a>
 
+            <th:block th:if="${histories.totalPages le 1}">
+                <span>1</span>
+            </th:block>
+
+            <th:block th:if="${histories.totalPages gt 1}">
             <th:block th:each="i:${#numbers.sequence(0, histories.totalPages-1)}">
                 <span th:if="${i}==${histories.number}" th:text="${i+1}"> </span>
                 <a th:if="${i}!=${histories.number}" th:href="@{/history(page=${i})}">
                     <span th:text="${i+1}"></span>
                 </a>
+            </th:block>
             </th:block>
 
             <a th:if="${histories.hasNext()}" th:href="@{/history(page=${histories.number + 1})}">次へ</a>

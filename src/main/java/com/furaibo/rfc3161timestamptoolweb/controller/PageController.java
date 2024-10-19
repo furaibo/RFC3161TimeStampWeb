@@ -101,6 +101,8 @@ public class PageController {
             model.addAttribute("showAddDocument", true);
         } else if (mode.equals("updateDocument")) {
             model.addAttribute("showUpdateDocument", true);
+        }else if (mode.equals("deleteDocument")) {
+            model.addAttribute("showDeleteDocument", true);
         }
 
         return "document";

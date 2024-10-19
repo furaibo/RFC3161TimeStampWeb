@@ -269,6 +269,25 @@ public class APIController {
                 .body(resource);
     }
 
+    @GetMapping("/document/delete")
+    public void deleteDocumentDelete(
+            @RequestParam("key") String downloadKey,
+            HttpServletResponse response) throws IOException {
+
+        // ダウンロードキーによるドキュメント検索
+        Document doc = documentRepository.getByDownloadKey(downloadKey);
+        if (doc == null) {
+            response.sendRedirect("/document" + "?mode=error");
+            return;
+        }
+
+        // ドキュメントの削除処理
+        documentRepository.delete(doc);
+
+        // リダイレクト
+        response.sendRedirect("/document" + "?mode=deleteDocument");
+    }
+
     /*
     @GetMapping("/document/verify")
     public ResponseEntity<Resource> verifyDocumentFiles(

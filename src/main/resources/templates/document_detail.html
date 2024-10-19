@@ -36,8 +36,9 @@
         <h1 class="pb-2 mt-4 mb-2 border-bottom">ドキュメント詳細</h1>
 
         <!-- alert -->
-        <div>
-            <div class="alert alert-success" th:if="${showUpdateDocument}">ドキュメントの更新が完了しました</div>
+        <div class="alert alert-warning alert-dismissible fade show" role="alert" th:if="${showUpdateDocument}">
+            <strong>ドキュメントの更新が完了しました</strong>.
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
 
         <!-- document detail table -->
@@ -59,15 +60,15 @@
                         <form class="row" method="POST" th:action="${document.getTitleUpdateApiLink()}">
                             <div class="input-group">
                                 <div class="col-10">
-                                    <input type="text" class="form-control" name="title" th:value="${document.title}" />
+                                    <input type="text" class="form-control" name="title" th:value="${document.title}" required />
                                 </div>
                                 <span class="input-group-addon"></span>
                                 <div class="col-1">
-                                    <input type="reset" class="form-control col-1 btn btn-secondary" value="リセット">
+                                    <input type="reset" class="form-control col-1 btn btn-secondary" value="戻す">
                                 </div>
                                 <span class="input-group-addon"></span>
                                 <div class="col-1">
-                                    <input type="submit" class="form-control col-1 btn btn-danger" value="更新">
+                                    <input type="submit" class="form-control col-1 btn btn-primary" value="更新">
                                 </div>
                             </div>
                         </form>
@@ -83,11 +84,11 @@
                                 </div>
                                 <span class="input-group-addon"></span>
                                 <div class="col-1">
-                                    <input type="reset" class="form-control col-1 btn btn-secondary" value="リセット">
+                                    <input type="reset" class="form-control col-1 btn btn-secondary" value="戻す">
                                 </div>
                                 <span class="input-group-addon"></span>
                                 <div class="col-1">
-                                    <input type="submit" class="form-control col-1 btn btn-danger" value="更新">
+                                    <input type="submit" class="form-control col-1 btn btn-primary" value="更新">
                                 </div>
                             </div>
                         </form>
@@ -103,11 +104,11 @@
                                 </div>
                                 <span class="input-group-addon"></span>
                                 <div class="col-1">
-                                    <input type="reset" class="form-control col-1 btn btn-secondary" value="リセット">
+                                    <input type="reset" class="form-control col-1 btn btn-secondary" value="戻す">
                                 </div>
                                 <span class="input-group-addon"></span>
                                 <div class="col-1">
-                                    <input type="submit" class="form-control col-1 btn btn-danger" value="更新">
+                                    <input type="submit" class="form-control col-1 btn btn-primary" value="更新">
                                 </div>
                             </div>
                         </form>
@@ -131,6 +132,33 @@
                 </tr>
             </tbody>
         </table>
+
+        <!-- Bottom buttons -->
+        <a class="btn btn-secondary float-start" href="/document"><i class="bi bi-chevron-up"></i>ドキュメント一覧へ戻る</a>
+        <button type="button" class="btn btn-danger float-end" data-bs-toggle="modal" data-bs-target="#deleteDocumentModal">
+            ドキュメント削除
+        </button>
+
+        <!-- Modal -->
+        <div class="modal fade" id="deleteDocumentModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="deleteDocumentModalLabel">ドキュメント削除の確認</h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        削除してもよろしいですか？
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">やめる</button>
+                        <a class="btn btn-danger" th:href="${document.getDeleteApiLink()}">
+                            <i class="bi bi-chevron-up"></i>削除する</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
     </div>
 </div>
 

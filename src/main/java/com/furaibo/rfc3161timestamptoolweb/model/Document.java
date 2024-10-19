@@ -85,6 +85,10 @@ public class Document {
         return "/api/document/download?key=" + this.downloadKey;
     }
 
+    public String getDeleteApiLink() {
+        return "/api/document/delete?key=" + this.downloadKey;
+    }
+
     // セッター
     public void renewUpdatedAt() {
         this.updatedAt = LocalDateTime.now();

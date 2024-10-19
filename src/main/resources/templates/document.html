@@ -36,9 +36,17 @@
         <h1 class="pb-2 mt-4 mb-2 border-bottom">保存済みドキュメント一覧</h1>
 
         <!-- alert -->
-        <div>
-            <div class="alert alert-success" th:if="${showAddDocument}">ドキュメントが追加されました</div>
-            <div class="alert alert-success" th:if="${showUpdateDocument}">ドキュメントの更新が完了しました</div>
+        <div class="alert alert-success alert-dismissible fade show" role="alert" th:if="${showAddDocument}">
+            <strong>ドキュメントが追加されました</strong>.
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        <div class="alert alert-success alert-dismissible fade show" role="alert" th:if="${showUpdateDocument}">
+            <strong>ドキュメントの更新が完了しました</strong>.
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        <div class="alert alert-success alert-dismissible fade show" role="alert" th:if="${showDeleteDocument}">
+            <strong>ドキュメントの削除が完了しました</strong>.
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
 
         <!-- search form -->

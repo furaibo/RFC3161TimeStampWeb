@@ -21,8 +21,10 @@ public class Document {
     private int id;
 
     @Column(name = "is_active", nullable = false)
-    @Expose
     private Boolean isActive;
+
+    @Column(name = "document_key")
+    private String documentKey;
 
     @Column(name = "title", nullable = false)
     @Expose
@@ -42,9 +44,6 @@ public class Document {
     @Column(name = "timestamp_file_path")
     private String timestampFilePath;
 
-    @Column(name = "download_key")
-    private String downloadKey;
-
     @Column(name = "verified_at")
     private LocalDateTime verifiedAt;
 
@@ -61,7 +60,7 @@ public class Document {
     // コンストラクタ
     public Document() {
         this.isActive = true;
-        this.downloadKey = UUID.randomUUID().toString();
+        this.documentKey = UUID.randomUUID().toString();
     }
 
     // ゲッター
@@ -70,23 +69,23 @@ public class Document {
     }
 
     public String getTitleUpdateApiLink() {
-        return "/api/document/" + this.id + "/update/title";
+        return "/api/document/update/title";
     }
 
     public String getDescriptionUpdateApiLink() {
-        return "/api/document/" + this.id + "/update/description";
+        return "/api/document/update/description";
     }
 
     public String getNoteUpdateApiLink() {
-        return "/api/document/" + this.id + "/update/note";
+        return "/api/document/update/note";
     }
 
     public String getDownloadApiLink() {
-        return "/api/document/download?key=" + this.downloadKey;
+        return "/api/document/download?key=" + this.documentKey;
     }
 
     public String getDeleteApiLink() {
-        return "/api/document/delete?key=" + this.downloadKey;
+        return "/api/document/delete?key=" + this.documentKey;
     }
 
     // セッター

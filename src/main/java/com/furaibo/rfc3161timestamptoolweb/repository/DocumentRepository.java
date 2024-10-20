@@ -12,8 +12,8 @@ import java.util.List;
 
 @Repository
 public interface DocumentRepository extends JpaRepository<Document, Integer> {
-    @Query(value = "SELECT * FROM documents WHERE download_key = :key", nativeQuery = true)
-    Document getByDownloadKey(String key);
+    @Query(value = "SELECT * FROM documents WHERE document_key = :key", nativeQuery = true)
+    Document getByDocumentKey(String key);
 
     @Query(value = "SELECT * FROM documents WHERE id IN :ids", nativeQuery = true)
     List<Document> findByIDs(List<Integer> ids);

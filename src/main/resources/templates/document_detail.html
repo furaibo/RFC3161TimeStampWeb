@@ -60,7 +60,8 @@
                         <form class="row" method="POST" th:action="${document.getTitleUpdateApiLink()}">
                             <div class="input-group">
                                 <div class="col-10">
-                                    <input type="text" class="form-control" name="title" th:value="${document.title}" required />
+                                    <input type="hidden" name="key" th:value="${document.getDocumentKey()}" required />
+                                    <input type="text" class="form-control" name="updateValue" th:value="${document.title}" required />
                                 </div>
                                 <span class="input-group-addon"></span>
                                 <div class="col-1">
@@ -80,7 +81,8 @@
                         <form class="row" method="POST" th:action="${document.getDescriptionUpdateApiLink()}">
                             <div class="input-group">
                                 <div class="col-10">
-                                    <input type="text" class="form-control" name="description" th:value="${document.description}" />
+                                    <input type="hidden" name="key" th:value="${document.getDocumentKey()}" required />
+                                    <input type="text" class="form-control" name="updateValue" th:value="${document.description}" />
                                 </div>
                                 <span class="input-group-addon"></span>
                                 <div class="col-1">
@@ -100,7 +102,8 @@
                         <form class="row" method="POST" th:action="${document.getNoteUpdateApiLink()}">
                             <div class="input-group">
                                 <div class="col-10">
-                                    <input type="text" class="form-control" name="note" th:value="${document.note}" />
+                                    <input type="hidden" name="key" th:value="${document.getDocumentKey()}" required />
+                                    <input type="text" class="form-control" name="updateValue" th:value="${document.note}" />
                                 </div>
                                 <span class="input-group-addon"></span>
                                 <div class="col-1">

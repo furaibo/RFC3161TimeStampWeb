@@ -69,70 +69,97 @@ public class APIController {
         return "It works!";
     }
 
-    @PostMapping("/document/{documentID}/update/title")
-    public void updateDocumentTitle(
-            @PathVariable("documentID") Integer documentID,
-            @RequestParam(name="title") String title,
-            HttpServletResponse response) throws IOException {
-
-        // 値の更新
-        Document doc = documentRepository.getReferenceById(documentID);
-        doc.setTitle(title);
-        doc.renewUpdatedAt();
-        documentRepository.save(doc);
-
-        // 操作履歴の追加
-        ActionHistory hist = new ActionHistory();
-        hist.setActionTitle("ドキュメント情報(タイトル)の更新");
-        hist.setActionDesc("documentID: " + documentID);
-        actionHistoryRepository.save(hist);
-
-        // リダイレクト
-        response.sendRedirect("/document/" + documentID + "?mode=updateDocument");
-    }
-
-    @PostMapping("/document/{documentID}/update/description")
+    @PostMapping("/document/update/{attr}")
     public void updateDocumentDescription(
-            @PathVariable("documentID") Integer documentID,
-            @RequestParam(name="description") String description,
+            @PathVariable("attr") String attr,
+            @RequestParam("key") String key,
+            @RequestParam("updateValue") String value,
             HttpServletResponse response) throws IOException {
 
-        // 値の更新
-        Document doc = documentRepository.getReferenceById(documentID);
-        doc.setDescription(description);
-        doc.renewUpdatedAt();
-        documentRepository.save(doc);
+        // キーによるドキュメント検索
+        Document doc = documentRepository.getByDocumentKey(key);
+        if (doc == null) {
+            response.sendRedirect("/document" + "?mode=error");
+            return;
+        }
 
         // 操作履歴の追加
         ActionHistory hist = new ActionHistory();
-        hist.setActionTitle("ドキュメント情報(内容説明)の更新");
-        hist.setActionDesc("documentID: " + documentID);
+
+        // 値のセット
+        switch (attr) {
+            case "title" -> {
+                doc.setTitle(value);
+                hist.setActionTitle("ドキュメント情報(タイトル)の更新");
+                hist.setActionDesc("documentID: " + doc.getId());
+            }
+            case "description" -> {
+                doc.setDescription(value);
+                hist.setActionTitle("ドキュメント情報(内容説明)の更新");
+                hist.setActionDesc("documentID: " + doc.getId());
+            }
+            case "note" -> {
+                doc.setNote(value);
+                hist.setActionTitle("ドキュメント情報(補足事項)の更新");
+                hist.setActionDesc("documentID: " + doc.getId());
+            }
+            default -> {
+                response.sendRedirect("/document" + "?mode=error");
+                return;
+            }
+        }
+
+        // 更新日時の設定
+        doc.renewUpdatedAt();
+
+        // レコードの更新処理
+        documentRepository.save(doc);
         actionHistoryRepository.save(hist);
 
         // リダイレクト
-        response.sendRedirect("/document/" + documentID + "?mode=updateDocument");
+        response.sendRedirect("/document/" + doc.getId() + "?mode=updateDocument");
     }
 
-    @PostMapping("/document/{documentID}/update/note")
-    public void updateDocumentNote(
-            @PathVariable("documentID") Integer documentID,
-            @RequestParam(name="note") String note,
+    @GetMapping("/document/delete")
+    public void deleteDocumentDelete(
+            @RequestParam("key") String key,
             HttpServletResponse response) throws IOException {
 
-        // 値の更新
-        Document doc = documentRepository.getReferenceById(documentID);
-        doc.setDescription(note);
-        doc.renewUpdatedAt();
-        documentRepository.save(doc);
+        // キーによるドキュメント検索
+        Document doc = documentRepository.getByDocumentKey(key);
+        if (doc == null) {
+            response.sendRedirect("/document" + "?mode=error");
+            return;
+        }
 
-        // 操作履歴の追加
-        ActionHistory hist = new ActionHistory();
-        hist.setActionTitle("ドキュメント情報(補足事項)の更新");
-        hist.setActionDesc("documentID: " + documentID);
-        actionHistoryRepository.save(hist);
+        // ドキュメントの削除処理
+        documentRepository.delete(doc);
 
         // リダイレクト
-        response.sendRedirect("/document/" + documentID + "?mode=updateDocument");
+        response.sendRedirect("/document" + "?mode=deleteDocument");
+    }
+
+    @GetMapping("/document/download")
+    public ResponseEntity<Resource> downloadDocumentFile(
+            @RequestParam("key") String key) throws IOException {
+
+        // キーによるドキュメント検索
+        Document doc = documentRepository.getByDocumentKey(key);
+        if (doc == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        // タイムスタンプ付与済みファイルおよびファイル名の準備
+        Path filePath = Paths.get(doc.getTimestampFilePath());
+        Resource resource = new PathResource(filePath);
+        String downloadFileName = doc.getTitle() + "." + FilenameUtils.getExtension(resource.getFilename());
+
+        // ファイルダウンロード用のレスポンス返却
+        return ResponseEntity.ok()
+                .contentType(getContentType(filePath))
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        "attachment; filename=\"" + downloadFileName + "\"")
+                .body(resource);
     }
 
     @PostMapping("/add/timestamp/pdf")
@@ -244,48 +271,6 @@ public class APIController {
 
         // リダイレクト
         response.sendRedirect("/document" + "?mode=addDocument");
-    }
-
-    @GetMapping("/document/download")
-    public ResponseEntity<Resource> downloadDocumentFile(
-            @RequestParam("key") String downloadKey) throws IOException {
-
-        // ダウンロードキーによるドキュメント検索
-        Document doc = documentRepository.getByDownloadKey(downloadKey);
-        if (doc == null) {
-            return ResponseEntity.notFound().build();
-        }
-
-        // タイムスタンプ付与済みファイルおよびファイル名の準備
-        Path filePath = Paths.get(doc.getTimestampFilePath());
-        Resource resource = new PathResource(filePath);
-        String downloadFileName = doc.getTitle() + "." + FilenameUtils.getExtension(resource.getFilename());
-
-        // ファイルダウンロード用のレスポンス返却
-        return ResponseEntity.ok()
-                .contentType(getContentType(filePath))
-                .header(HttpHeaders.CONTENT_DISPOSITION,
-                        "attachment; filename=\"" + downloadFileName + "\"")
-                .body(resource);
-    }
-
-    @GetMapping("/document/delete")
-    public void deleteDocumentDelete(
-            @RequestParam("key") String downloadKey,
-            HttpServletResponse response) throws IOException {
-
-        // ダウンロードキーによるドキュメント検索
-        Document doc = documentRepository.getByDownloadKey(downloadKey);
-        if (doc == null) {
-            response.sendRedirect("/document" + "?mode=error");
-            return;
-        }
-
-        // ドキュメントの削除処理
-        documentRepository.delete(doc);
-
-        // リダイレクト
-        response.sendRedirect("/document" + "?mode=deleteDocument");
     }
 
     /*

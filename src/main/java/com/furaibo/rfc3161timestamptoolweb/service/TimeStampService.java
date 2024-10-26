@@ -1,5 +1,6 @@
 package com.furaibo.rfc3161timestamptoolweb.service;
 
+import com.furaibo.rfc3161timestamptoolweb.model.Document;
 import jakarta.annotation.PostConstruct;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.csv.CSVFormat;
@@ -60,12 +61,13 @@ public class TimeStampService {
 
     private Path outputFileFolderPath;
     private Path outputLogFolderPath;
-    private final DateTimeFormatter dtFormat = DateTimeFormatter.ofPattern("yyyyMMdd");
+    private final DateTimeFormatter dtf1 = DateTimeFormatter.ofPattern("yyyyMMdd");
+    private final DateTimeFormatter dtf2 = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
 
     @PostConstruct
     public void init() {
         LocalDateTime ldt = LocalDateTime.now();
-        this.outputFileFolderPath = Paths.get(this.outputFileFolderPathStr, ldt.format(dtFormat));
+        this.outputFileFolderPath = Paths.get(this.outputFileFolderPathStr, ldt.format(dtf1));
         this.outputLogFolderPath = Paths.get(this.outputLogFolderPathStr);
     }
 
@@ -171,12 +173,13 @@ public class TimeStampService {
     /**
      * 複数ファイルの検証結果を実施後、検証結果をCSVファイルで出力する
      *
-     * @param inputFilePathList
+     * @param documents
      * @throws IOException
      * @throws TSPException
      * @throws CMSException
      */
-    public Path verifyTimeStampInMultipleFiles(List<Path> inputFilePathList)
+    public Path verifyTimeStampInMultipleFiles(
+            List<Document> documents)
             throws IOException, TSPException, CMSException {
 
         // ディレクトリの作成
@@ -185,19 +188,21 @@ public class TimeStampService {
         // 出力先のCSVファイルパスを設定
         String outputCsvFilePathStr = String.format(
                 "%s/%s_verify_log.csv",
-                this.outputLogFolderPath, dtFormat.format(LocalDateTime.now())
+                this.outputLogFolderPath, dtf2.format(LocalDateTime.now())
             );
 
         // CSVPrinterの初期化
-        FileWriter fileWriter = new FileWriter(outputCsvFilePathStr, true);
+        FileWriter fileWriter = new FileWriter(outputCsvFilePathStr, false);
         CSVFormat csvFormat = CSVFormat.RFC4180.builder().
                 setHeader(
+                    "ドキュメントID", "タイトル",
                     "ファイル名", "検証結果", "シリアル番号", "生成時刻",
                     "TSA情報", "有効期限", "証明書発行者").
                 build();
         CSVPrinter csvPrinter = new CSVPrinter(fileWriter, csvFormat);
 
-        for(Path path: inputFilePathList) {
+        for(Document doc: documents) {
+            Path path = Paths.get(doc.getTimestampFilePath());
             String inputFileName = path.getFileName().toString();
 
             // タイムスタンプ情報の取得
@@ -214,6 +219,8 @@ public class TimeStampService {
 
             // CSVファイルへの書き込み
             csvPrinter.printRecord(
+                doc.getId(),                 // ドキュメントID
+                doc.getTitle(),              // ドキュメントタイトル
                 inputFileName,               // ファイル名
                 timestampStatusStr,          // 検証結果
                 tsInfo.getSerialNumber(),    // シリアル番号

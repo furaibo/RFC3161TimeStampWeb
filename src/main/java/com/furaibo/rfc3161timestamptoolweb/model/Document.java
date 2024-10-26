@@ -23,7 +23,7 @@ public class Document {
     @Column(name = "is_active", nullable = false)
     private Boolean isActive;
 
-    @Column(name = "document_key")
+    @Column(name = "document_key", nullable = false, updatable = false)
     private String documentKey;
 
     @Column(name = "title", nullable = false)

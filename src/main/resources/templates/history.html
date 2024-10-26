@@ -52,6 +52,8 @@
             </th:block>
             </th:block>
 
+            <span th:text="${'(件数:' + histories.getTotalElements() + ')'}"></span>
+
             <a th:if="${histories.hasNext()}" th:href="@{/history(page=${histories.number + 1})}">次へ</a>
         </div>
 

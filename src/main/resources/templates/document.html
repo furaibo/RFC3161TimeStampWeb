@@ -89,6 +89,8 @@
             </th:block>
             </th:block>
 
+            <span th:text="${'(件数:' + documents.getTotalElements() + ')'}"></span>
+
             <a th:if="${documents.hasNext()}" th:href="@{/document(page=${documents.number + 1})}">次へ</a>
         </div>
 
@@ -118,6 +120,12 @@
                 </th:block>
             </tbody>
         </table>
+
+        <!-- bottom button -->
+        <div class="my-4">
+            <a th:href="'/api/document/verify?keyword=' + ${keyword} + '&startDate=' + ${startDate} + '&endDate=' + ${endDate}"
+               class="btn btn-light float-end" role="button">現在の検索条件で検証結果ファイルを取得</a>
+        </div>
     </div>
 </div>
 

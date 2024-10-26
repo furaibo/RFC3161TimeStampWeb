@@ -15,22 +15,37 @@ public interface DocumentRepository extends JpaRepository<Document, Integer> {
     @Query(value = "SELECT * FROM documents WHERE document_key = :key", nativeQuery = true)
     Document getByDocumentKey(String key);
 
-    @Query(value = "SELECT * FROM documents WHERE id IN :ids", nativeQuery = true)
-    List<Document> findByIDs(List<Integer> ids);
+    @Query(value = "SELECT * FROM documents " +
+            "ORDER BY created_at DESC " +
+            "LIMIT :limit ", nativeQuery = true)
+    List<Document> findLatestWithLimit(int limit);
 
     @Query(value = "SELECT * FROM documents " +
-            "WHERE (title LIKE '%' || :keyword || '%') OR (description LIKE '%' || :keyword || '%') " +
+            "WHERE (title LIKE '%' || :keyword || '%' OR description LIKE '%' || :keyword || '%') ", nativeQuery = true)
+    List<Document> findByKeyword(String keyword);
+
+    @Query(value = "SELECT * FROM documents " +
+            "WHERE (created_at BETWEEN :startDate AND :endDate) ", nativeQuery = true)
+    List<Document> findByDateRange(LocalDate startDate, LocalDate endDate);
+
+    @Query(value = "SELECT * FROM documents " +
+            "WHERE (title LIKE '%' || :keyword || '%' OR description LIKE '%' || :keyword || '%') " +
+            "  AND (created_at BETWEEN :startDate AND :endDate)", nativeQuery = true)
+    List<Document> findByKeywordAndDateRange(String keyword, LocalDate startDate, LocalDate endDate);
+
+    @Query(value = "SELECT * FROM documents " +
+            "WHERE (title LIKE '%' || :keyword || '%' OR description LIKE '%' || :keyword || '%') " +
             "\n -- #pageable \n", nativeQuery = true)
-    Page<Document> findByKeyword(Pageable pageable, String keyword);
+    Page<Document> findPageByKeyword(Pageable pageable, String keyword);
 
     @Query(value = "SELECT * FROM documents " +
             "WHERE (created_at BETWEEN :startDate AND :endDate) " +
             "\n -- #pageable \n", nativeQuery = true)
-    Page<Document> findByDateRange(Pageable pageable, LocalDate startDate, LocalDate endDate);
+    Page<Document> findPageByDateRange(Pageable pageable, LocalDate startDate, LocalDate endDate);
 
     @Query(value = "SELECT * FROM documents " +
-            "WHERE (title LIKE '%' || :keyword || '%') OR (description LIKE '%' || :keyword || '%') " +
+            "WHERE (title LIKE '%' || :keyword || '%' OR description LIKE '%' || :keyword || '%') " +
             "  AND (created_at BETWEEN :startDate AND :endDate) " +
             "\n -- #pageable \n", nativeQuery = true)
-    Page<Document> findByKeywordAndDateRange(Pageable pageable, String keyword, LocalDate startDate, LocalDate endDate);
+    Page<Document> findPageByKeywordAndDateRange(Pageable pageable, String keyword, LocalDate startDate, LocalDate endDate);
 }

@@ -12,7 +12,10 @@ import com.google.gson.GsonBuilder;
 import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FilenameUtils;
+import org.bouncycastle.cms.CMSException;
+import org.bouncycastle.tsp.TSPException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.PathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
@@ -27,7 +30,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -37,11 +42,14 @@ import java.util.List;
 @RequestMapping("/api/")
 public class APIController {
 
-    private Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().create();
+    private final Gson gson = new GsonBuilder().
+            excludeFieldsWithoutExposeAnnotation().create();
 
     private TimeStampService tss;
     private PDFService pdfs;
     private FileService fls;
+
+    DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
     @Autowired
     public APIController(TimeStampService tss, PDFService pdfs, FileService fls) {
@@ -55,6 +63,9 @@ public class APIController {
 
     @Autowired
     private ActionHistoryRepository actionHistoryRepository;
+
+    @Value("${app.default.search.limit}")
+    private int defaultSearchLimit;
 
     @GetMapping("/test")
     public String testTimeStampResponse(){
@@ -109,11 +120,11 @@ public class APIController {
             }
         }
 
-        // 更新日時の設定
-        doc.renewUpdatedAt();
-
         // レコードの更新処理
+        doc.renewUpdatedAt();
         documentRepository.save(doc);
+
+        // 操作履歴の追加
         actionHistoryRepository.save(hist);
 
         // リダイレクト
@@ -135,6 +146,12 @@ public class APIController {
         // ドキュメントの削除処理
         documentRepository.delete(doc);
 
+        // 操作履歴の追加
+        ActionHistory hist = new ActionHistory();
+        hist.setActionTitle("ドキュメントの削除処理");
+        hist.setActionDesc("documentID: " + doc.getId());
+        actionHistoryRepository.save(hist);
+
         // リダイレクト
         response.sendRedirect("/document" + "?mode=deleteDocument");
     }
@@ -153,6 +170,12 @@ public class APIController {
         Path filePath = Paths.get(doc.getTimestampFilePath());
         Resource resource = new PathResource(filePath);
         String downloadFileName = doc.getTitle() + "." + FilenameUtils.getExtension(resource.getFilename());
+
+        // 操作履歴の追加
+        ActionHistory hist = new ActionHistory();
+        hist.setActionTitle("ファイルダウンロード処理");
+        hist.setActionDesc("documentID: " + doc.getId());
+        actionHistoryRepository.save(hist);
 
         // ファイルダウンロード用のレスポンス返却
         return ResponseEntity.ok()
@@ -203,7 +226,7 @@ public class APIController {
                 // 操作履歴の追加
                 ActionHistory hist = new ActionHistory();
                 hist.setActionTitle("新規PDFファイルの追加");
-                hist.setActionDesc("PDFファイルへのタイムスタンプ追加 - ファイル名: " + fileName);
+                hist.setActionDesc("documentID: " + doc.getId());
                 actionHistoryRepository.save(hist);
             }
 
@@ -261,8 +284,8 @@ public class APIController {
 
             // 操作履歴の追加
             ActionHistory hist = new ActionHistory();
-            hist.setActionTitle("PDF形式以外のファイル追加");
-            hist.setActionDesc("非PDFファイルのPDF形式変換およびタイムスタンプ追加");
+            hist.setActionTitle("非PDF形式のファイル追加");
+            hist.setActionDesc("documentID: " + doc.getId());
             actionHistoryRepository.save(hist);
 
         } catch (Exception e) {
@@ -273,28 +296,53 @@ public class APIController {
         response.sendRedirect("/document" + "?mode=addDocument");
     }
 
-    /*
     @GetMapping("/document/verify")
     public ResponseEntity<Resource> verifyDocumentFiles(
-            @RequestParam("documentIds") List<Integer> ids) throws IOException, TSPException, CMSException {
+            @RequestParam("keyword") String keyword,
+            @RequestParam("startDate") String startDate,
+            @RequestParam("endDate") String endDate) throws IOException, TSPException, CMSException {
 
-        // IDのリストによるドキュメント検索
-        List<Document> documentList = documentRepository.findByIDs(ids);
-
-        // 入力ファイルパスのリストの準備
-        List<Path> inputFilePathList = new ArrayList<Path>();
-        for (Document doc : documentList) {
-            Path filePath = Paths.get(doc.getTimestampFilePath());
-            inputFilePathList.add(filePath);
+        // 日付関連の処理
+        LocalDate dtFrom, dtTo;
+        LocalDate dtNow = LocalDate.now();
+        LocalDateTime ldtNow = LocalDateTime.now();
+        if (startDate.isBlank()) {
+            dtFrom = dtNow.minusYears(5);
+        } else {
+            dtFrom = LocalDate.parse(startDate, dtf);
+        }
+        if (endDate.isBlank()) {
+            dtTo = dtNow;
+        } else {
+            dtTo = LocalDate.parse(endDate, dtf);
         }
 
-        // 検証結果CSVファイルの準備
-        Path outputCsvFilePath = tss.verifyTimeStampInMultipleFiles(inputFilePathList);
+        // 条件指定によるドキュメント検索
+        List<Document> documents;
+        if (keyword.isBlank()) {
+            if (startDate.isBlank() && endDate.isBlank()) {
+                // 新しい順に検索
+                documents = documentRepository.findLatestWithLimit(defaultSearchLimit);
+            } else {
+                // 日時のみで検索
+                documents = documentRepository.findByDateRange(dtFrom, dtTo);
+            }
+        } else {
+            if (startDate.isBlank() && endDate.isBlank()) {
+                // キーワードのみで検索
+                documents = documentRepository.findByKeyword(keyword);
+            } else {
+                // キーワード及び日時で検索
+                documents = documentRepository.findByKeywordAndDateRange(keyword, dtFrom, dtTo);
+            }
+        }
+
+        // タイムスタンプ検証結果CSVファイルの準備
+        Path outputCsvFilePath = tss.verifyTimeStampInMultipleFiles(documents);
 
         // 前回検証日時の更新処理
-        LocalDateTime dtNow = LocalDateTime.now();
-        for (Document doc : documentList) {
-            doc.setVerifiedAt(dtNow);
+        for (Document doc : documents) {
+            doc.setVerifiedAt(ldtNow);
             documentRepository.save(doc);
         }
 
@@ -309,7 +357,6 @@ public class APIController {
                         "attachment; filename=\"" + downloadCsvFileName + "\"")
                 .body(resource);
     }
-     */
 
     private MediaType getContentType(Path path) throws IOException {
         try {

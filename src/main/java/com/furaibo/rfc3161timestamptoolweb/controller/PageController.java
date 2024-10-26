@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 
-import java.text.ParseException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
@@ -47,7 +46,7 @@ public class PageController {
             @ModelAttribute("endDate") String endDate,
             @ModelAttribute("mode") String mode,
             @ModelAttribute("page") String page,
-            Model model) throws ParseException {
+            Model model) {
 
         // 日付関連の処理
         LocalDate dtFrom, dtTo;
@@ -79,19 +78,19 @@ public class PageController {
         Page<Document> documents;
         if (keyword.isBlank()) {
             if (startDate.isBlank() && endDate.isBlank()) {
-                // 新しい順に検索
+                // 全体の検索
                 documents = documentRepository.findAll(pageable);
             } else {
                 // 日時のみで検索
-                documents = documentRepository.findByDateRange(pageable, dtFrom, dtTo);
+                documents = documentRepository.findPageByDateRange(pageable, dtFrom, dtTo);
             }
         } else {
             if (startDate.isBlank() && endDate.isBlank()) {
                 // キーワードのみで検索
-                documents = documentRepository.findByKeyword(pageable, keyword);
+                documents = documentRepository.findPageByKeyword(pageable, keyword);
             } else {
                 // キーワード及び日時で検索
-                documents = documentRepository.findByKeywordAndDateRange(pageable, keyword, dtFrom, dtTo);
+                documents = documentRepository.findPageByKeywordAndDateRange(pageable, keyword, dtFrom, dtTo);
             }
         }
         model.addAttribute("documents", documents);
